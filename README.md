@@ -1,7 +1,7 @@
 # 🏛️ MIA AI Agent – GovTech
 
 <p align="center">
-  <img width="460" height="450" src="">
+  <img width="460" height="450" src="https://github.com/SilvanaJ90/MIA-govtech-agent/blob/main/img/mia.png">
 </p>
 
 
