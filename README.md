@@ -128,12 +128,11 @@ You can try the live demo here:
   </a>
 </p>
 
-### ML/AI
-<p align="left">
-  <a href="https://www.langchain.com/" target="_blank">
-    <img src="https://img.shields.io/badge/langchain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white"/>
-  </a>
-</p>
+### ML/AI:
+ <p align="left"><a href="https://www.langchain.com/" target="_blank" rel="noreferrer"> <img src="https://img.shields.io/badge/langchain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white"/> </a>
+  <a href="https://gemini.google.com" target="_blank" rel="noreferrer"> <img src="https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white"/> </a>
+ <a href="https://huggingface.co/" target="_blank" rel="noreferrer"> <img src="https://img.shields.io/badge/-HuggingFace-FDEE21?style=for-the-badge&logo=HuggingFace&logoColor=black"/> </a>
+ </p>
 
 ### Frontend
 <p align="left">
