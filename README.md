@@ -1,7 +1,7 @@
 # 🏛️ MIA – Municipal Intelligence Agent
 
 <p align="center">
-  <img width="460" height="450" src="https://github.com/SilvanaJ90/MIA-govtech-agent/blob/main/img/mia.png">
+  <img width="460" height="450" src="https://github.com/SilvanaJ90/MIA-govtech-agent/blob/main/frontend/assets/img/mia.png">
 </p>
 
 ---
@@ -99,8 +99,10 @@ Build an **AI conversational agent** that ensures transparent, fast, and accessi
 | Activate on Windows          | `.\.venv\Scripts\Activate.ps1` | Activate virtual environment (Windows) |
 | Activate on macOS/Linux      | `source .venv/bin/activate` | Activate virtual environment (macOS/Linux) |
 | Install dependencies         | `pip install -r requirements.txt` | Install all required libraries |
-| Configure OpenAI API Key     | `openai_api_key: <your_openai_api_key>` | Rename `config.example.yaml` to `config.yaml` and replace `"your_openai_api_key"` with your OpenAI key |
-| Run AI Agent                 | `streamlit run app/app.py` | Start the chatbot with Streamlit |
+| **Create `.env` file** | `nano .env` | Create environment file with your API keys |
+| **Add your API keys** |  | <pre>GOOGLE_API_KEY=tu_api_key_google<br>HUGGING_FACE=tu_api_key_huggingface</pre> |
+| **Export environment variables (Linux/macOS)** | `export $(cat .env | xargs)` | Load API keys into environment |
+| Run AI Agent                 | `streamlit run frontend/app.py` | Start the chatbot with Streamlit |
 | Chat with your bot           | Open browser → `http://localhost:8501` | Interact with the AI Agent |
 
 
