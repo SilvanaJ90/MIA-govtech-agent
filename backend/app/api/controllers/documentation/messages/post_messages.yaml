@@ -1,0 +1,39 @@
+summary: "Create a message"
+description: "Create a new chat message. If session_id is omitted a session will be created."
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: payload
+    required: true
+    schema:
+      type: object
+      properties:
+        message_id:
+          type: string
+        session_id:
+          type: string
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        sender_id:
+          type: string
+        sender_type:
+          type: string
+          enum: ["user","system","bot"]
+      required: ["content"]
+responses:
+  201:
+    description: "Message created"
+    schema:
+      type: object
+  400:
+    description: "Invalid payload"
+  403:
+    description: "Content contains banned words"
+  404:
+    description: "Sender or session not found"
+  500:
+    description: "Server error"
