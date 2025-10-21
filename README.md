@@ -96,7 +96,7 @@ Build an **AI conversational agent** that ensures transparent, fast, and accessi
 |------------------------------|---------|-------------|
 | Clone the project            | `git clone https://github.com/SilvanaJ90/MIA-govtech-agent.git` | Clone repository |
 | Create virtual environment   | `python -m venv .venv` | Create isolated Python environment |
-| Activate on Windows          | `.\.venv\Scripts\Activate.ps1` | Activate virtual environment (Windows) |
+| Activate on Windows          | `.venv\Scripts\activate` | Activate virtual environment (Windows) |
 | Activate on macOS/Linux      | `source .venv/bin/activate` | Activate virtual environment (macOS/Linux) |
 | Install dependencies         | `pip install -r requirements.txt` | Install all required libraries |
 | **Create `.env` file** | `nano .env` | Create environment file with your API keys |
