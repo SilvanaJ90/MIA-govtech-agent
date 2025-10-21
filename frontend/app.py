@@ -18,6 +18,8 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
+DOCS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+
 # ------------------------------
 # Import backend modules
 # ------------------------------
@@ -129,7 +131,7 @@ if "chat_history" not in st.session_state:
 # ------------------------------
 with st.sidebar:
     try:
-        st.image("img/mia.png", width=120)
+        st.image("frontend/assets/img/mia.png", width=120)
     except Exception:
         pass
 
@@ -144,26 +146,21 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("📄 Documentos")
 
-    manual_ethics = (
-        "Manual de Ética — MIA\n\nTransparencia, privacidad y uso responsable de IA."
-    )
-    manual_privacy = (
-        "Política de Privacidad — MIA\n\nTratamiento de datos y protección ciudadana."
-    )
+    # Ruta del documento PDF real
+    pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
 
-    st.download_button(
-        label="📘 Manual de Ética",
-        data=manual_ethics.encode("utf-8"),
-        file_name=f"manual_etica_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-        mime="text/plain",
-    )
-
-    st.download_button(
-        label="🔒 Política de Privacidad",
-        data=manual_privacy.encode("utf-8"),
-        file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-        mime="text/plain",
-    )
+    # Verificar existencia del PDF y mostrar botón de descarga
+    if os.path.exists(pdf_path):
+        with open(pdf_path, "rb") as pdf_file:
+            pdf_data = pdf_file.read()
+            st.download_button(
+                label="📘 Política, Ética, Transparencia y Privacidad — MIA",
+                data=pdf_data,
+                file_name="Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf",
+                mime="application/pdf",
+            )
+    else:
+        st.warning("⚠️ No se encontró el documento PDF en la carpeta docs.")
 
     st.markdown("---")
     st.caption("MIA — Agente IA público. Disponible 24/7.")
@@ -172,14 +169,12 @@ with st.sidebar:
 # Render Inicio
 # ------------------------------
 def render_inicio():
-
     st.write("# Bienvenido a MIA Agente IA para Atención Ciudadana ✨")
     st.markdown(
         """
-    MIA Agent es una plataforma de atención ciudadana que responde preguntas, gestiona turnos y facilita trámites de manera automatizada.
-    """
+        MIA Agent es una plataforma de atención ciudadana que responde preguntas, gestiona turnos y facilita trámites de manera automatizada.
+        """
     )
-
 
     st.markdown("### 📈 Métricas públicas (ejemplo)")
     c1, c2, c3 = st.columns(3)
