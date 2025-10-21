@@ -301,8 +301,10 @@ def render_mia_agent():
 # ------------------------------
 with st.sidebar:
     try:
-        # Intenta cargar una imagen simulada (reemplazar con tu ruta real si existe)
-        st.image("img/mia.png", width=120) 
+        # Ruta absoluta al archivo de imagen dentro de frontend/assets/img
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        image_path = os.path.join(current_dir, "assets", "img", "mia.png")
+        st.image(image_path, width=120)
     except Exception:
         # Si la imagen no carga, usa un placeholder
         st.header("🏛️ MIA")
