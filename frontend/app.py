@@ -25,6 +25,8 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
+DOCS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+
 # ------------------------------
 # 2. CARGA DE .ENV 
 # ------------------------------
@@ -473,6 +475,7 @@ with st.sidebar:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         image_path = os.path.join(current_dir, "assets", "img", "mia.png")
         st.image(image_path, width=120)
+        st.image("frontend/assets/img/mia.png", width=120)
     except Exception:
         # Si la imagen no carga, usa un placeholder
         st.header("🏛️ MIA")
