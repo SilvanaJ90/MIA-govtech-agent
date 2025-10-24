@@ -1,3 +1,5 @@
+tags:
+  - Messages
 summary: "Create a message"
 description: "Create a new chat message. If session_id is omitted a session will be created."
 consumes:

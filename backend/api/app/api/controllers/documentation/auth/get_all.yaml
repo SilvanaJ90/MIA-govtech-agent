@@ -1,0 +1,6 @@
+tags:
+  - Auth
+summary: Listar usuarios
+responses:
+  200:
+    description: Lista de usuarios obtenida correctamente

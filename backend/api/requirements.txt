@@ -6,3 +6,5 @@ pytest>=7.0
 flasgger>=0.9.5
 python-dotenv>=1.0
 pytest-cov
+flask_jwt_extended
+pydantic[email]>=2.0

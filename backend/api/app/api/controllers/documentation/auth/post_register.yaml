@@ -1,0 +1,25 @@
+summary: Register a new user
+tags:
+  - Auth
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          email:
+            type: string
+            format: email
+          password:
+            type: string
+            minLength: 6
+          first_name:
+            type: string
+          last_name:
+            type: string
+responses:
+  201:
+    description: User registered successfully
+  400:
+    description: Invalid request or email exists

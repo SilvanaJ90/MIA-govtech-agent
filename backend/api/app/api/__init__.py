@@ -11,6 +11,7 @@ to manage different versions of your API.
 """
 
 from .controllers.messages import bp as messages_bp
+from .controllers.auth import bp as auth_bp
 
 
 def register_blueprints(app):
@@ -22,3 +23,5 @@ def register_blueprints(app):
     """
     # Register the messages blueprint under the /api/messages prefix
     app.register_blueprint(messages_bp, url_prefix="/api/messages")
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    

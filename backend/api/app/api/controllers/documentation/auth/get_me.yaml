@@ -1,0 +1,10 @@
+summary: Get the authenticated user's info
+tags:
+  - Auth
+security:
+  - BearerAuth: []
+responses:
+  200:
+    description: Returns user info
+  404:
+    description: User not found

@@ -112,51 +112,5 @@ def get(model_cls, id_):
         return obj
 
 
-# -------------------------------------------------------------------------
-# Preload test data for API usage
-# -------------------------------------------------------------------------
-def preload_test_data():
-    """Carga sender, session y mensaje de prueba en la base de datos."""
 
-    # Crear sender si no existe
-    sender_id = "sender_1"
-    if sender_id not in [s.id for s in all(Sender).values()]:
-        sender = Sender(
-            id=sender_id,
-            email="user1@example.com",
-            first_name="User",
-            last_name="One",
-            type="user",
-            is_active=True,
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        new(sender)
 
-    # Crear sesión si no existe
-    session_id = "sess_123456"
-    if session_id not in [s.session_id for s in all(Session).values()]:
-        session = Session(
-            session_id=session_id,
-            user_id=sender_id,
-            title="Chat de prueba",
-            id="sess_id_1",
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        new(session)
-
-    # Crear mensaje de prueba si no existe
-    message_id = "msg_001"
-    if message_id not in [m.message_id for m in all(Message).values()]:
-        msg = Message(
-            message_id=message_id,
-            session_id=session_id,
-            sender_id=sender_id,
-            content="Hola, este es un mensaje de prueba",
-            timestamp=datetime.now(),
-            id="msg_id_1",
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        new(msg)

@@ -1,0 +1,13 @@
+tags:
+  - Auth
+summary: Obtener usuario por ID
+parameters:
+  - name: user_id
+    in: path
+    required: true
+    type: string
+responses:
+  200:
+    description: Usuario encontrado
+  404:
+    description: Usuario no encontrado

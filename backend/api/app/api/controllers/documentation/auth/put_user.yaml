@@ -1,0 +1,27 @@
+tags:
+  - Auth
+summary: Actualizar usuario
+parameters:
+  - name: user_id
+    in: path
+    required: true
+    type: string
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+responses:
+  200:
+    description: Usuario actualizado correctamente
+  404:
+    description: Usuario no encontrado

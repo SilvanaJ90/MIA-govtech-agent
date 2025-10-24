@@ -73,19 +73,19 @@ class BaseModel:
 
     def to_dict(self):
         """
-        Serializes the model instance into a dictionary.
-
-        Returns:
-            dict: A dictionary representation of the model,
-                  including class name and formatted timestamps.
+        Serializa el modelo a un diccionario JSON-friendly.
+        Convierte Enums y datetimes automáticamente.
         """
         d = dict(self.__dict__)
         d.pop("_sa_instance_state", None)
         d["__class__"] = self.__class__.__name__
-        if isinstance(self.created_at, datetime):
-            d["created_at"] = self.created_at.strftime(TIME_FORMAT)
-        if isinstance(self.updated_at, datetime):
-            d["updated_at"] = self.updated_at.strftime(TIME_FORMAT)
+
+        for key, value in d.items():
+            if isinstance(value, datetime):
+                d[key] = value.strftime(TIME_FORMAT)
+            elif hasattr(value, "value"):  # Manejar enums
+                d[key] = value.value
+
         return d
 
     def __repr__(self):
