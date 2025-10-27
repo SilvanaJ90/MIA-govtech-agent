@@ -26,6 +26,8 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
+DOCS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+
 # ------------------------------
 # 2. CARGA DE .ENV 
 # ------------------------------

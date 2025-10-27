@@ -1,0 +1,31 @@
+summary: "List messages for a session"
+parameters:
+  - name: session_id
+    in: path
+    required: true
+    type: string
+  - name: limit
+    in: query
+    required: false
+    type: integer
+    default: 50
+  - name: offset
+    in: query
+    required: false
+    type: integer
+    default: 0
+  - name: sender
+    in: query
+    required: false
+    type: string
+responses:
+  200:
+    description: "List of messages"
+    schema:
+      type: array
+  400:
+    description: "Invalid parameters"
+  404:
+    description: "Session not found"
+  500:
+    description: "Server error"
