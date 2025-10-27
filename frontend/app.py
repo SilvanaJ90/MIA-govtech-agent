@@ -6,11 +6,12 @@ Incluye sistema de navegación, gestión de citas y derivación de casos.
 #!/usr/bin/env python3
 import sys
 import os
-from datetime import datetime, timedelta # Necesitamos timedelta para fechas
+from datetime import date, datetime, timedelta # Necesitamos timedelta para fechas
 import streamlit as st
 import logging # Para un mejor manejo de errores/info
 from typing import Optional, Dict
 import sqlite3
+import pandas as pd
 
 # --- Configuración Inicial ---
 logging.basicConfig(level=logging.INFO)
@@ -46,11 +47,9 @@ except Exception as e:
 # ------------------------------
 try:
     from memory import memory
-    from chain import classify_intent,generate_response_from_llm, docsearch # <-- Tu cadena existente
+    from chain import docsearch 
     # Importar la nueva lógica de gestión
-    from appointment_manager import (
-        QueryProcessor, CaseType, Appointment, AppointmentManager, CaseRouter, DepartmentType  # Importar todo
-    )
+    from appointment_manager import QueryProcessor
     # Inicialización de QueryProcessor (asumiendo que tiene la lógica de citas)
     query_processor = QueryProcessor() 
     
@@ -67,6 +66,10 @@ import sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "mia_users.db")
 
+conn = sqlite3.connect(DB_PATH)
+c = conn.cursor()
+
+
 def init_user_db():
     """Crea la tabla de usuarios si no existe."""
     conn = sqlite3.connect(DB_PATH)
@@ -77,7 +80,8 @@ def init_user_db():
             name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             dni TEXT NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            is_admin INTEGER DEFAULT 0
         )
     """)
     conn.commit()
@@ -114,10 +118,70 @@ def init_data_tables():
     """)
     conn.commit()
     conn.close()
+    
+def init_metrics_table():
+    """Crea tabla para métricas de uso si no existe."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS metrics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            total_queries INTEGER DEFAULT 0,
+            appointments INTEGER DEFAULT 0,
+            complex_cases INTEGER DEFAULT 0,
+            tokens_used INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+    
+def ensure_admin_exists():
+    """Verifica si existe al menos un administrador. Si no, permite crearlo desde Streamlit."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM citizens WHERE is_admin = 1")
+    has_admin = c.fetchone()[0] > 0
+    conn.close()
 
-# Llama ambas inicializaciones al inicio de la app
+    if not has_admin:
+        st.title("🧑‍💼 Configuración inicial del administrador")
+        st.info("No se ha encontrado ningún usuario administrador. Crea uno para continuar.")
+
+        with st.form("create_admin_form"):
+            name = st.text_input("Nombre completo del administrador")
+            email = st.text_input("Correo institucional")
+            password = st.text_input("Contraseña", type="password")
+            dni = st.text_input("DNI o documento de identidad")
+            submitted = st.form_submit_button("Crear administrador")
+
+            if submitted:
+                if not (name and email and password and dni):
+                    st.error("Por favor, completa todos los campos.")
+                    return
+                try:
+                    conn = sqlite3.connect(DB_PATH)
+                    c = conn.cursor()
+                    c.execute(
+                        "INSERT INTO citizens (name, email, dni, password, is_admin) VALUES (?, ?, ?, ?, 1)",
+                        (name, email, dni, password)
+                    )
+                    conn.commit()
+                    conn.close()
+                    st.success(f"✅ Administrador '{name}' creado correctamente.")
+                    st.info("Ahora puedes iniciar sesión con tus credenciales.")
+                    st.stop()
+                except Exception as e:
+                    st.error(f"Error al crear el administrador: {e}")
+                    st.stop()
+
+
+
+# Llama las inicializaciones al inicio de la app
 init_user_db()
 init_data_tables()
+init_metrics_table()
+ensure_admin_exists()
 
 def save_appointment_to_db(appointment):
     """Guarda una cita confirmada en la base SQLite."""
@@ -139,6 +203,7 @@ def save_appointment_to_db(appointment):
     ))
     conn.commit()
     conn.close()
+    update_metrics("appointments")
 
 
 def save_case_to_db(case):
@@ -170,6 +235,7 @@ def save_case_to_db(case):
     ))
     conn.commit()
     conn.close()
+    update_metrics("complex_cases")
 
 
 def register_user(name, email, dni, password):
@@ -197,8 +263,21 @@ def authenticate_user(email, password):
         return {"id": user[0], "name": user[1], "email": user[2], "dni": user[3]}
     return None
 
-# Inicializa la DB al arrancar
-init_user_db()
+def update_metrics(field, increment=1):
+    """Actualiza las métricas diarias en la base."""
+    today = date.today().isoformat()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    # Crear registro del día si no existe
+    c.execute("SELECT * FROM metrics WHERE date = ?", (today,))
+    row = c.fetchone()
+    if not row:
+        c.execute("INSERT INTO metrics (date) VALUES (?)", (today,))
+    # Actualizar campo correspondiente
+    c.execute(f"UPDATE metrics SET {field} = {field} + ? WHERE date = ?", (increment, today))
+    conn.commit()
+    conn.close()
+
 
 
 st.set_page_config(
@@ -301,6 +380,7 @@ def ask_question(prompt: str) -> str:
     if not query_processor:
         return "El sistema no está inicializado. Contacte a soporte."
     
+    update_metrics("total_queries")
     st.session_state.metrics['llm_calls'] += 1 # Métricas
     
     response_data = query_processor.process_query(
@@ -469,73 +549,98 @@ def render_mia_agent():
 # ------------------------------
 # Sidebar
 # ------------------------------
-with st.sidebar:
-    try:
-        # Ruta absoluta al archivo de imagen dentro de frontend/assets/img
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "assets", "img", "mia.png")
-        st.image(image_path, width=120)
-        st.image("frontend/assets/img/mia.png", width=120)
-    except Exception:
-        # Si la imagen no carga, usa un placeholder
-        st.header("🏛️ MIA")
+if not st.session_state.get("is_admin"):
+    with st.sidebar:
+        try:
+            # Ruta absoluta al archivo de imagen dentro de frontend/assets/img
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            image_path = os.path.join(current_dir, "assets", "img", "mia.png")
+            st.image(image_path, width=120)
+        except Exception:
+            # Si la imagen no carga, usa un placeholder
+            st.header("🏛️ MIA")
 
-    st.title("MIA — Menú")
-    st.markdown("Seleccione una sección:")
+        st.title("MIA — Menú Ciudadano")
+        st.markdown("Seleccione una sección:")
 
-    # Botones de navegación
-    if st.button("🏠 Inicio"):
-        st.session_state.current_section = "inicio"
-    if st.button("💬 Chat con MIA"):
-        st.session_state.current_section = "mia_agent"
+        # Botones de navegación
+        if st.button("🏠 Inicio"):
+            st.session_state.current_section = "inicio"
+        if st.button("💬 Chat con MIA"):
+            st.session_state.current_section = "mia_agent"
 
-    # Botón de formulario de cita (visible solo si está en modo chat y hay una cita pendiente)
-    if st.session_state.pending_appointment and st.session_state.current_section == "mia":
-        if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
-            st.session_state.current_section = "appointment_form"
-            st.rerun()
+        # Botón de formulario de cita (solo si hay cita pendiente)
+        if (
+            st.session_state.pending_appointment
+            and st.session_state.current_section == "mia_agent"
+        ):
+            if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
+                st.session_state.current_section = "appointment_form"
+                st.rerun()
 
+        st.markdown("---")
+        st.subheader("📄 Documentos")
 
-    st.markdown("---")
-    st.subheader("📄 Documentos")
+        manual_ethics = (
+            "Manual de Ética — MIA\n\nTransparencia, privacidad y uso responsable de IA."
+        )
+        manual_privacy = (
+            "Política de Privacidad — MIA\n\nTratamiento de datos y protección ciudadana."
+        )
 
-    manual_ethics = (
-        "Manual de Ética — MIA\n\nTransparencia, privacidad y uso responsable de IA."
-    )
-    manual_privacy = (
-        "Política de Privacidad — MIA\n\nTratamiento de datos y protección ciudadana."
-    )
+        # Botones de descarga
+        st.download_button(
+            label="📘 Manual de Ética",
+            data=manual_ethics.encode("utf-8"),
+            file_name=f"manual_etica_mia_{datetime.now().strftime('%Y%m%d')}.txt",
+            mime="text/plain",
+        )
 
-    # Botones de descarga
-    st.download_button(
-        label="📘 Manual de Ética",
-        data=manual_ethics.encode("utf-8"),
-        file_name=f"manual_etica_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-        mime="text/plain",
-    )
+        st.download_button(
+            label="🔒 Política de Privacidad",
+            data=manual_privacy.encode("utf-8"),
+            file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.txt",
+            mime="text/plain",
+        )
 
-    st.download_button(
-        label="🔒 Política de Privacidad",
-        data=manual_privacy.encode("utf-8"),
-        file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-        mime="text/plain",
-    )
+        # ------------------------------
+        # BOTÓN DE CIERRE DE SESIÓN (CIUDADANO)
+        # ------------------------------
+        if (
+            st.session_state.get("logged_in")
+            and not st.session_state.get("is_admin")
+            and st.session_state.get("current_section") == "mia_agent"
+        ):
+            st.markdown("---")
+            st.caption("Sesión activa: Ciudadano")
+            if st.button("🚪 Cerrar sesión"):
+                for key in ["logged_in", "citizen_id", "citizen_name", "citizen_email", "is_admin"]:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.session_state.current_section = "inicio"
+                st.rerun()
 
-    st.markdown("---")
 # ------------------------------
 # 8. Renderizado de Métricas y Flujo Principal
 # ------------------------------
 
 def render_metrics():
     st.sidebar.subheader("📊 Métricas de Uso")
-    col1, col2, col3 = st.sidebar.columns(3)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT SUM(total_queries), SUM(appointments), SUM(complex_cases) FROM metrics")
+    data = c.fetchone() or (0, 0, 0)
+    conn.close()
     
-    col1.metric("Llamadas LLM", st.session_state.metrics['llm_calls'])
-    col2.metric("Turnos", st.session_state.metrics['appointments'])
-    col3.metric("Derivaciones", st.session_state.metrics['derivations'])
+    
+    col1, col2, col3 = st.sidebar.columns(3)
+
+    col1.metric("Consultas", data[0])
+    col2.metric("Citas", data[1])
+    col3.metric("Casos derivados", data[2])
     st.sidebar.markdown("---")
     
-    if st.sidebar.button("Reiniciar Conversación", help="Borra el historial de chat y métricas"):
+    if st.sidebar.button("Reiniciar Conversación", help="Borra el historial de conversación actual"):
         st.session_state.chat_history = [
             {"role": "assistant", "text": "¡Hola! He reiniciado mi memoria. ¿En qué te puedo ayudar?"}
         ]
@@ -562,14 +667,20 @@ def render_login():
         email = st.text_input("Correo electrónico", key="login_email")
         password = st.text_input("Contraseña", type="password", key="login_password")
         if st.button("Entrar", type="primary", key="login_button"):
-            user = authenticate_user(email, password)
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT id, name, email, is_admin FROM citizens WHERE email=? AND password=?", (email, password))
+            user = c.fetchone()
+            conn.close()
+
             if user:
                 st.session_state.logged_in = True
-                st.session_state.citizen_id = user["dni"]
-                st.session_state.citizen_name = user["name"]
-                st.session_state.citizen_email = user["email"]
-                st.session_state.current_section = "mia_agent"
-                st.success(f"¡Bienvenido/a, {user['name']}!")
+                st.session_state.citizen_id = user[0]
+                st.session_state.citizen_name = user[1]
+                st.session_state.citizen_email = user[2]
+                st.session_state.is_admin = bool(user[3])
+                st.session_state.current_section = "admin" if st.session_state.is_admin else "mia_agent"
+                st.success(f"¡Bienvenido/a, {user[1]}!")
                 st.rerun()
             else:
                 st.error("Credenciales incorrectas. Intenta nuevamente.")
@@ -585,27 +696,113 @@ def render_login():
                 st.success(msg)
             else:
                 st.error(msg)
+                
+def render_admin_panel():
+    """Panel administrativo para visualizar métricas y datos del sistema."""
+    st.title("🧑‍💼 Panel Administrativo - MIA")
+    st.markdown("Bienvenido, **administrador**. Desde aquí puedes visualizar la actividad general del asistente y las gestiones ciudadanas realizadas.")
+
+    st.markdown("---")
+
+    # ------------------------------
+    # MÉTRICAS DIARIAS
+    # ------------------------------
+    st.subheader("📈 Actividad diaria")
+
+    conn = sqlite3.connect(DB_PATH)
+    df_metrics = pd.read_sql_query("SELECT * FROM metrics ORDER BY date DESC", conn)
+    df_appointments = pd.read_sql_query("SELECT * FROM appointments ORDER BY created_at DESC", conn)
+    df_cases = pd.read_sql_query("SELECT * FROM complex_cases ORDER BY created_at DESC", conn)
+    conn.close()
+
+    if not df_metrics.empty:
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Consultas", int(df_metrics["total_queries"].sum()))
+        col2.metric("Citas", int(df_metrics["appointments"].sum()))
+        col3.metric("Casos derivados", int(df_metrics["complex_cases"].sum()))
+        st.line_chart(df_metrics.set_index("date")[["total_queries", "appointments", "complex_cases"]])
+    else:
+        st.info("Aún no hay métricas registradas en el sistema.")
+
+    st.markdown("---")
+
+    # ------------------------------
+    # TABLA DE CITAS
+    # ------------------------------
+    st.subheader("🗓️ Citas registradas")
+    if not df_appointments.empty:
+        df_appointments_view = df_appointments[["id", "citizen_email", "procedure", "date", "time", "status"]]
+        df_appointments_view.rename(columns={
+            "citizen_email": "Ciudadano",
+            "procedure": "Trámite",
+            "date": "Fecha",
+            "time": "Hora",
+            "status": "Estado"
+        }, inplace=True)
+        st.dataframe(df_appointments_view, use_container_width=True)
+    else:
+        st.info("No hay citas registradas aún.")
+
+    st.markdown("---")
+
+    # ------------------------------
+    # TABLA DE CASOS COMPLEJOS
+    # ------------------------------
+    st.subheader("⚖️ Casos derivados")
+    if not df_cases.empty:
+        df_cases_view = df_cases[["id", "citizen_email", "description", "department", "priority", "status", "created_at"]]
+        df_cases_view.rename(columns={
+            "citizen_email": "Ciudadano",
+            "description": "Descripción",
+            "department": "Departamento",
+            "priority": "Prioridad",
+            "status": "Estado",
+            "created_at": "Fecha creación"
+        }, inplace=True)
+        st.dataframe(df_cases_view, use_container_width=True)
+    else:
+        st.info("No hay casos derivados aún.")
+
+    st.markdown("---")
+
+    # ------------------------------
+    # BOTÓN DE CIERRE DE SESIÓN
+    # ------------------------------
+    st.sidebar.markdown("---")
+    if st.sidebar.button("🚪 Cerrar sesión de administrador"):
+        for key in ["logged_in", "citizen_id", "citizen_name", "citizen_email", "is_admin"]:
+            if key in st.session_state:
+                del st.session_state[key]
+        st.session_state.current_section = "inicio"
+        st.rerun()
+
 
 # ------------------------------
 # 9. DISPATCHER (Flujo de la App)
 # ------------------------------
 
-render_metrics()
+
 
 # Mostrar login primero si no está autenticado
 if not st.session_state.get("logged_in", False):
     render_login()
 else:
     section = st.session_state.current_section
-    if section == "mia_agent":
-        render_mia_agent()
-    elif section == "appointment_form":
-        render_appointment_form(st.session_state.pending_appointment)
-    elif section == "inicio":
-        st.header("🏛️ Bienvenido a MIA")
-        st.markdown("Selecciona una opción en el menú lateral para comenzar.")
+    
+    if st.session_state.get("is_admin"):
+        render_admin_panel()
+        
     else:
-        st.warning("Sección no reconocida. Volviendo al chat principal.")
-        st.session_state.current_section = "mia_agent"
-        st.rerun()
+        if section == "mia_agent":
+            render_mia_agent()
+        elif section == "appointment_form":
+            render_appointment_form(st.session_state.pending_appointment)
+        elif section == "inicio":
+            st.header("🏛️ Bienvenido a MIA")
+            st.markdown("Selecciona una opción en el menú lateral para comenzar.")
+        
+        else:
+            st.warning("Sección no reconocida. Volviendo al chat principal.")
+            st.session_state.current_section = "mia_agent"
+            st.rerun()
 
