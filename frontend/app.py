@@ -31,7 +31,12 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
-DOCS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+# Ruta del documento PDF que quieres descargar
+pdf_path = "docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+
+# Leer el archivo en modo binario
+with open(pdf_path, "rb") as f:
+    pdf_data = f.read()
 
 # ------------------------------
 # 2. CARGA DE .ENV 
