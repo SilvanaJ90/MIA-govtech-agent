@@ -26,7 +26,12 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
-DOCS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "docs"))
+# Ruta del documento PDF que quieres descargar
+pdf_path = "docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+
+# Leer el archivo en modo binario
+with open(pdf_path, "rb") as f:
+    pdf_data = f.read()
 
 # ------------------------------
 # 2. CARGA DE .ENV 
@@ -588,22 +593,15 @@ if not st.session_state.get("is_admin"):
             "Política de Privacidad — MIA\n\nTratamiento de datos y protección ciudadana."
         )
 
-        # Botones de descarga
-        st.download_button(
-            label="📘 Manual de Ética",
-            data=manual_ethics.encode("utf-8"),
-            file_name=f"manual_etica_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-            mime="text/plain",
-        )
 
+        # Crear el botón de descarga
         st.download_button(
-            label="🔒 Política de Privacidad",
-            data=manual_privacy.encode("utf-8"),
-            file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.txt",
-            mime="text/plain",
+            label="🔒 Política de Privacidad Y Manual de Ética",
+            data=pdf_data,
+            file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.pdf",
+            mime="application/pdf",
         )
-
-        # ------------------------------
+                # ------------------------------
         # BOTÓN DE CIERRE DE SESIÓN (CIUDADANO)
         # ------------------------------
         if (
