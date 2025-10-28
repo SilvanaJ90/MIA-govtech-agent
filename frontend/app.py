@@ -31,12 +31,9 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
-# Ruta del documento PDF que quieres descargar
-pdf_path = "docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
-
-# Leer el archivo en modo binario
-with open(pdf_path, "rb") as f:
-    pdf_data = f.read()
+DOCS_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "docs")
+)
 
 # ------------------------------
 # 2. CARGA DE .ENV 
@@ -622,8 +619,7 @@ if not st.session_state.get("is_admin"):
             with open(pdf_path, "rb") as f:
                 pdf_bytes = f.read()
 
-            # Guarda el contenido en la sesión para usarlo luego en la sección principal
-            #st.session_state.pdf_bytes = pdf_bytes
+            
 
             # Botón para abrir el manual en una nueva sección
             if st.button("📖 Ver Manual Completo"):
