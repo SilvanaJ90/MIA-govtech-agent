@@ -12,6 +12,11 @@ import logging # Para un mejor manejo de errores/info
 from typing import Optional, Dict
 import sqlite3
 import pandas as pd
+import base64
+
+if "current_section" not in st.session_state:
+    st.session_state.current_section = "inicio"
+
 
 # --- Configuración Inicial ---
 logging.basicConfig(level=logging.INFO)
@@ -26,12 +31,9 @@ BACKEND_CHATBOT_PATH = os.path.abspath(
 if BACKEND_CHATBOT_PATH not in sys.path:
     sys.path.append(BACKEND_CHATBOT_PATH)
 
-# Ruta del documento PDF que quieres descargar
-pdf_path = "docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
-
-# Leer el archivo en modo binario
-with open(pdf_path, "rb") as f:
-    pdf_data = f.read()
+DOCS_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "docs")
+)
 
 # ------------------------------
 # 2. CARGA DE .ENV 
@@ -63,7 +65,6 @@ except Exception as e:
     st.error(f"Error al inicializar módulos del backend. Revisa logs de terminal: {e}")
     st.stop() # Detener para que el usuario solucione el error
 
-import sqlite3
 
 # ------------------------------
 # AUTENTICACIÓN BÁSICA (SQLite)
@@ -565,43 +566,81 @@ if not st.session_state.get("is_admin"):
             # Si la imagen no carga, usa un placeholder
             st.header("🏛️ MIA")
 
-        st.title("MIA — Menú Ciudadano")
-        st.markdown("Seleccione una sección:")
+        # -------------------------------
+        # MENÚ PRINCIPAL / ACCESO
+        # -------------------------------
+        if not st.session_state.get("logged_in"):
+            st.title("🏛️ MIA — Portal de Acceso")
+            st.markdown("Selecciona cómo deseas ingresar:")
+            st.info("🔹 Como **ciudadano** para realizar consultas o trámites.\n🔹 Como **administrador** para gestionar métricas y casos.")
+            
+            # Botones para elegir modo de ingreso
+            if st.button("👤 Ingresar como Ciudadano"):
+                st.session_state['login_mode'] = "citizen"
+                st.session_state.current_section = "inicio"  # mantiene el login
+                st.rerun()
 
-        # Botones de navegación
-        if st.button("🏠 Inicio"):
-            st.session_state.current_section = "inicio"
-        if st.button("💬 Chat con MIA"):
-            st.session_state.current_section = "mia_agent"
+            if st.button("🧑‍💼 Ingresar como Administrador"):
+                st.session_state['login_mode'] = "admin"
+                st.session_state.current_section = "inicio"
+                st.rerun()
 
-        # Botón de formulario de cita (solo si hay cita pendiente)
+        else:
+            if not st.session_state.get("is_admin"):
+                st.title("👤 MIA — Menú Ciudadano")
+                st.markdown("Selecciona una acción:")
+            else:
+                st.title("🧑‍💼 Panel de Administración")
+
+        # -------------------------------
+        # BOTÓN DE CITA PENDIENTE
+        # -------------------------------
         if (
-            st.session_state.pending_appointment
-            and st.session_state.current_section == "mia_agent"
+            st.session_state.get("pending_appointment")
+            and st.session_state.get("current_section") == "mia_agent"
         ):
             if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
                 st.session_state.current_section = "appointment_form"
                 st.rerun()
 
+        # -------------------------------
+        # MANUAL DE ÉTICA Y PRIVACIDAD
+        # -------------------------------
         st.markdown("---")
-        st.subheader("📄 Documentos")
+        st.subheader("📘 Manual de Ética y Privacidad")
 
-        manual_ethics = (
-            "Manual de Ética — MIA\n\nTransparencia, privacidad y uso responsable de IA."
-        )
-        manual_privacy = (
-            "Política de Privacidad — MIA\n\nTratamiento de datos y protección ciudadana."
+        st.markdown(
+            "Consulta el documento oficial sobre transparencia, uso responsable de IA y privacidad de datos personales."
         )
 
+        pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
 
-        # Crear el botón de descarga
-        st.download_button(
-            label="🔒 Política de Privacidad Y Manual de Ética",
-            data=pdf_data,
-            file_name=f"politica_privacidad_mia_{datetime.now().strftime('%Y%m%d')}.pdf",
-            mime="application/pdf",
-        )
-                # ------------------------------
+        if os.path.exists(pdf_path):
+            with open(pdf_path, "rb") as f:
+                pdf_bytes = f.read()
+
+            
+
+            # Botón para abrir el manual en una nueva sección
+            if st.button("📖 Ver Manual Completo"):
+                st.session_state["show_manual"] = True
+                st.rerun()
+            if st.session_state.get("show_manual"):
+                st.markdown("### 📄 Manual de Ética, Transparencia y Privacidad")
+                st.download_button(
+                    label="⬇️ Descargar PDF",
+                    data=pdf_bytes,
+                    file_name="manual_etica_privacidad_MIA.pdf",
+                    mime="application/pdf",
+                )
+                base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+                pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+                st.markdown(pdf_display, unsafe_allow_html=True)
+        else:
+            st.warning("El manual aún no está disponible.")
+
+
+        # ------------------------------
         # BOTÓN DE CIERRE DE SESIÓN (CIUDADANO)
         # ------------------------------
         if (
@@ -798,6 +837,7 @@ else:
         elif section == "inicio":
             st.header("🏛️ Bienvenido a MIA")
             st.markdown("Selecciona una opción en el menú lateral para comenzar.")
+        
         
         else:
             st.warning("Sección no reconocida. Volviendo al chat principal.")

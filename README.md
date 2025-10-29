@@ -7,16 +7,16 @@
 ---
 
 ### 📑 Table of Contents
-1. [Version History](#version-history)  
-2. [Project Information](#project-information)  
-3. [Business Context](#business-context)  
-4. [Project Planning](#project-planning)  
-5. [Project Development](#project-development)  
-6. [How to Start It](#how-to-start-it)  
-7. [Video Mia](#video-mia)  
-8. [Demo](#demo)  
-9. [Languages and Tools](#languages-and-tools)  
-10. [Authors](#authors)  
+1. [Version History](#-version-history)  
+2. [Project Information](#-project-information)  
+3. [Business Context](#-business-context)  
+4. [Project Planning](#-project-planning)  
+5. [Project Development](#-project-development)  
+6. [How to Start It](#-how-to-start-it)  
+7. [Video Mia](#-video-mia)  
+8. [Demo](#-demo)  
+9. [Languages and Tools](#-languages-and-tools)  
+10. [Authors](#-authors)  
 
 ---
 
@@ -88,23 +88,69 @@ Build an **AI conversational agent** that ensures transparent, fast, and accessi
 | **6. Testing & Validation** | Ensure usability, accessibility, and compliance. |
 
 ---
+### 🗂️ Project Structure
 
+The project follows a modular architecture that separates the frontend, backend, and chatbot components.
+This structure ensures scalability, maintainability, and clean integration between layers.
 
+```plaintext
+MIA-govtech-agent/
+├── .devcontainer/
+│   └── devcontainer.json            # Configuration file for VS Code or GitHub Codespaces container
+|
+├── backend/
+│   ├── chatbot/
+│   │   ├── chain.py                 # Core conversational flow logic
+│   │   ├── prompt_template.py       # Prompt templates for the LLM
+│   │   ├── data_preprocessing.py    # Data cleaning and preprocessing before embedding
+│   │   ├── llm.py                   # Configuration and management of the language model
+│   │   ├── memory.py                # Conversational memory handling
+│   │   ├── text_splitter.py         # Splits long documents into semantic chunks
+│   │   ├── vector_db.py             # Vector database for embeddings
+│   │   └── doc/
+│   │       └── rawdata/
+│   │           └── documento.pdf    # Document used as source of RAG
+│   │
+│   └── __init__.py                  # Initializes backend as a package
+│
+├── frontend/
+│   ├── app.py                       # Main Streamlit application
+│   ├── appointment_manager.py       # Appointment and case management module
+│   ├── assets/
+│   │   └── img/
+│   │       ├── mia.ico              # Application icon
+│   │       └── mia.png              # UI logo
+│   └── templates/                   # (Optional) UI templates
+│
+├── docs/
+│   └── Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf  # Transparency and ethics policy document
+│
+│
+├── .gitignore                       # Ignored files and directories
+├── README.md                        # Main documentation
+└── requirements.txt                 # Python dependencies
+```
+
+💡 Note: When running frontend/app.py, a local SQLite database (mia_users.db) is automatically created.
+This file is excluded from version control through .gitignore.
+
+---
 
 ## 🚀 How to Start It
 | Step                         | Command | Description |
 |------------------------------|---------|-------------|
 | Clone the project            | `git clone https://github.com/SilvanaJ90/MIA-govtech-agent.git` | Clone repository |
+| **Option 1 – Run inside a Dev Container (recommended)** | Open in VS Code → `Ctrl + Shift + P` → **Dev Containers: Reopen in Container** | Launches a fully configured development environment using `.devcontainer/devcontainer.json` |
+| **Option 2 – Run locally** |  | Follow the steps below for manual setup |
 | Create virtual environment   | `python -m venv .venv` | Create isolated Python environment |
 | Activate on Windows          | `.venv\Scripts\activate` | Activate virtual environment (Windows) |
 | Activate on macOS/Linux      | `source .venv/bin/activate` | Activate virtual environment (macOS/Linux) |
 | Install dependencies         | `pip install -r requirements.txt` | Install all required libraries |
 | **Create `.env` file** | `nano .env` | Create environment file with your API keys |
-| **Add your API keys** |  | <pre>GOOGLE_API_KEY=tu_api_key_google<br>HUGGING_FACE=tu_api_key_huggingface</pre> |
-| **Export environment variables (Linux/macOS)** | `export $(cat .env | xargs)` | Load API keys into environment |
+| **Add your API keys** |  | <pre>GOOGLE_API_KEY=your_google_api_key<br></pre> |
+| **Export environment variables (Linux/macOS)** | `export $(cat .env \| xargs)` | Load API keys into environment |
 | Run AI Agent                 | `streamlit run frontend/app.py` | Start the chatbot with Streamlit |
 | Chat with your bot           | Open browser → `http://localhost:8501` | Interact with the AI Agent |
-
 
 ---
 
