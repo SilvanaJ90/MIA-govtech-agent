@@ -48,26 +48,19 @@ except ImportError:
     pass
 except Exception as e:
     st.error(f"Error al cargar variables de entorno: {e}")
-
-# ------------------------------
-# 3. IMPORTACIÓN DE MÓDULOS DE BACKEND Y NUEVA LÓGICA
-# ------------------------------
-try:
-    from memory import memory
-    from chain import docsearch 
-    # Importar la nueva lógica de gestión
-    from appointment_manager import QueryProcessor
-    # Inicialización de QueryProcessor (asumiendo que tiene la lógica de citas)
-    query_processor = QueryProcessor() 
     
-except Exception as e:
-    # Capturar errores durante la inicialización, como el de la ruta de FAISS.
-    st.error(f"Error al inicializar módulos del backend. Revisa logs de terminal: {e}")
-    st.stop() # Detener para que el usuario solucione el error
+# ------------------------------
+# 1. CONFIGURACIÓN INICIAL STREAMLIT
+# ------------------------------
 
+st.set_page_config(
+    page_title="MIA - Agente de Atención Ciudadana",
+    page_icon="🏛️",
+    layout="wide",
+)
 
 # ------------------------------
-# AUTENTICACIÓN BÁSICA (SQLite)
+# 2. AUTENTICACIÓN BÁSICA (SQLite)
 # ------------------------------
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "mia_users.db")
@@ -189,6 +182,23 @@ init_data_tables()
 init_metrics_table()
 ensure_admin_exists()
 
+# ------------------------------
+# 3. IMPORTACIÓN DE MÓDULOS DE BACKEND Y NUEVA LÓGICA
+# ------------------------------
+try:
+    from memory import memory
+    from chain import docsearch 
+    # Importar la nueva lógica de gestión
+    from appointment_manager import QueryProcessor
+    # Inicialización de QueryProcessor (asumiendo que tiene la lógica de citas)
+    query_processor = QueryProcessor() 
+    
+except Exception as e:
+    # Capturar errores durante la inicialización, como el de la ruta de FAISS.
+    st.error(f"Error al inicializar módulos del backend. Revisa logs de terminal: {e}")
+    st.stop() # Detener para que el usuario solucione el error
+
+
 def save_appointment_to_db(appointment):
     """Guarda una cita confirmada en la base SQLite."""
     conn = sqlite3.connect(DB_PATH)
@@ -286,11 +296,6 @@ def update_metrics(field, increment=1):
 
 
 
-st.set_page_config(
-    page_title="MIA - Agente de Atención Ciudadana",
-    page_icon="🏛️",
-    layout="wide",
-)
 
 # ------------------------------
 # 4. STREAMLIT STATE INICIALIZACIÓN
