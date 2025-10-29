@@ -95,6 +95,9 @@ This structure ensures scalability, maintainability, and clean integration betwe
 
 ```plaintext
 MIA-govtech-agent/
+├── .devcontainer/
+│   └── devcontainer.json            # Configuration file for VS Code or GitHub Codespaces container
+|
 ├── backend/
 │   ├── chatbot/
 │   │   ├── chain.py                 # Core conversational flow logic
@@ -137,16 +140,17 @@ This file is excluded from version control through .gitignore.
 | Step                         | Command | Description |
 |------------------------------|---------|-------------|
 | Clone the project            | `git clone https://github.com/SilvanaJ90/MIA-govtech-agent.git` | Clone repository |
+| **Option 1 – Run inside a Dev Container (recommended)** | Open in VS Code → `Ctrl + Shift + P` → **Dev Containers: Reopen in Container** | Launches a fully configured development environment using `.devcontainer/devcontainer.json` |
+| **Option 2 – Run locally** |  | Follow the steps below for manual setup |
 | Create virtual environment   | `python -m venv .venv` | Create isolated Python environment |
 | Activate on Windows          | `.venv\Scripts\activate` | Activate virtual environment (Windows) |
 | Activate on macOS/Linux      | `source .venv/bin/activate` | Activate virtual environment (macOS/Linux) |
 | Install dependencies         | `pip install -r requirements.txt` | Install all required libraries |
 | **Create `.env` file** | `nano .env` | Create environment file with your API keys |
-| **Add your API keys** |  | <pre>GOOGLE_API_KEY=tu_api_key_google<br></pre> |
-| **Export environment variables (Linux/macOS)** | `export $(cat .envxargs)` |  | Load API keys into environment |
+| **Add your API keys** |  | <pre>GOOGLE_API_KEY=your_google_api_key<br></pre> |
+| **Export environment variables (Linux/macOS)** | `export $(cat .env | xargs)` | Load API keys into environment |
 | Run AI Agent                 | `streamlit run frontend/app.py` | Start the chatbot with Streamlit |
 | Chat with your bot           | Open browser → `http://localhost:8501` | Interact with the AI Agent |
-
 
 ---
 
