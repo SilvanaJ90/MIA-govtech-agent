@@ -148,7 +148,7 @@ This file is excluded from version control through .gitignore.
 | Install dependencies         | `pip install -r requirements.txt` | Install all required libraries |
 | **Create `.env` file** | `nano .env` | Create environment file with your API keys |
 | **Add your API keys** |  | <pre>GOOGLE_API_KEY=your_google_api_key<br></pre> |
-| **Export environment variables (Linux/macOS)** | `export $(cat .env | xargs)` | Load API keys into environment |
+| **Export environment variables (Linux/macOS)** | `export $(cat .env \| xargs)` | Load API keys into environment |
 | Run AI Agent                 | `streamlit run frontend/app.py` | Start the chatbot with Streamlit |
 | Chat with your bot           | Open browser → `http://localhost:8501` | Interact with the AI Agent |
 
