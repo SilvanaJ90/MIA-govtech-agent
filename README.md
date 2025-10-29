@@ -93,6 +93,7 @@ Build an **AI conversational agent** that ensures transparent, fast, and accessi
 The project follows a modular architecture that separates the frontend, backend, and chatbot components.
 This structure ensures scalability, maintainability, and clean integration between layers.
 
+```plaintext
 MIA-govtech-agent/
 ├── backend/
 │   ├── chatbot/
@@ -125,11 +126,12 @@ MIA-govtech-agent/
 ├── .gitignore                       # Ignored files and directories
 ├── README.md                        # Main documentation
 └── requirements.txt                 # Python dependencies
-
 ```
+
 💡 Note: When running frontend/app.py, a local SQLite database (mia_users.db) is automatically created.
 This file is excluded from version control through .gitignore.
 
+---
 
 ## 🚀 How to Start It
 | Step                         | Command | Description |
