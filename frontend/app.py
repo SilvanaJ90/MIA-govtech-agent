@@ -611,8 +611,9 @@ if not st.session_state.get("is_admin"):
         # -------------------------------
         # MANUAL DE ÉTICA Y PRIVACIDAD
         # -------------------------------
+        
         st.markdown("---")
-        st.subheader("📘 Manual de Ética y Privacidad")
+        st.subheader("📘 Manual de Ética, Transparencia y Privacidad de Datos")
 
         st.markdown(
             "Consulta el documento oficial sobre transparencia, uso responsable de IA y privacidad de datos personales."
@@ -624,43 +625,19 @@ if not st.session_state.get("is_admin"):
             with open(pdf_path, "rb") as f:
                 pdf_bytes = f.read()
 
-            
+            # ✅ Mostrar un solo botón para ver/descargar el PDF
+            st.download_button(
+                label="📘 Ver Manual (PDF)",
+                data=pdf_bytes,
+                file_name="Manual_Etica_Transparencia_Privacidad_MIA.pdf",
+                mime="application/pdf",
+                help="Haz clic para abrir el manual en una nueva pestaña."
+            )
 
-            # Botón para abrir el manual en una nueva sección
-            if st.button("📖 Ver Manual Completo"):
-                st.session_state["show_manual"] = True
-                st.rerun()
-            if st.session_state.get("show_manual"):
-                st.markdown("### 📄 Manual de Ética, Transparencia y Privacidad")
-                st.download_button(
-                    label="⬇️ Descargar PDF",
-                    data=pdf_bytes,
-                    file_name="manual_etica_privacidad_MIA.pdf",
-                    mime="application/pdf",
-                )
-                base64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-                pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
-                st.markdown(pdf_display, unsafe_allow_html=True)
+            st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
         else:
             st.warning("El manual aún no está disponible.")
 
-
-        # ------------------------------
-        # BOTÓN DE CIERRE DE SESIÓN (CIUDADANO)
-        # ------------------------------
-        if (
-            st.session_state.get("logged_in")
-            and not st.session_state.get("is_admin")
-            and st.session_state.get("current_section") == "mia_agent"
-        ):
-            st.markdown("---")
-            st.caption("Sesión activa: Ciudadano")
-            if st.button("🚪 Cerrar sesión"):
-                for key in ["logged_in", "citizen_id", "citizen_name", "citizen_email", "is_admin"]:
-                    if key in st.session_state:
-                        del st.session_state[key]
-                st.session_state.current_section = "inicio"
-                st.rerun()
 
 # ------------------------------
 # 8. Renderizado de Métricas y Flujo Principal
