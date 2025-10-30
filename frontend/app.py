@@ -621,11 +621,13 @@ if not st.session_state.get("is_admin"):
 
         pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
         # Ruta relativa (desde la raíz del proyecto) para abrir el archivo directamente
-        pdf_url = "./assets/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+        #pdf_url = "./assets/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
 
         if os.path.exists(pdf_path):
-            pdf_button = f"""
-            <a href="{pdf_url}" target="_blank" style="
+            with open(pdf_path, "rb") as f:
+                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+            pdf_display = f"""
+            <a href="data:application/pdf;base64,{base64_pdf}" target="_blank" style="
                 display: inline-block;
                 background-color: #1E88E5;
                 color: white;
@@ -641,8 +643,15 @@ if not st.session_state.get("is_admin"):
             </a>
             """
 
-            st.markdown(pdf_button, unsafe_allow_html=True)
+            st.markdown(pdf_display, unsafe_allow_html=True)
             st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
+            # Opción alternativa: mostrar el PDF embebido en la misma página
+            with st.expander("🔍 O visualízalo aquí directamente"):
+                st.markdown(
+                    f'<iframe src="data:application/pdf;base64,{base64_pdf}" '
+                    f'width="100%" height="800" type="application/pdf"></iframe>',
+                    unsafe_allow_html=True
+                )
         else:
             st.warning("El manual aún no está disponible.")
 
