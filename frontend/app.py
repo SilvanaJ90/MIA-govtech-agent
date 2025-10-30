@@ -620,20 +620,28 @@ if not st.session_state.get("is_admin"):
         )
 
         pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
+        # Ruta relativa (desde la raíz del proyecto) para abrir el archivo directamente
+        pdf_url = "./docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
 
         if os.path.exists(pdf_path):
-            with open(pdf_path, "rb") as f:
-                pdf_bytes = f.read()
+            pdf_button = f"""
+            <a href="{pdf_url}" target="_blank" style="
+                display: inline-block;
+                background-color: #1E88E5;
+                color: white;
+                font-weight: 600;
+                text-decoration: none;
+                padding: 0.6em 1.4em;
+                border-radius: 10px;
+                transition: background-color 0.3s ease;
+            " 
+            onmouseover="this.style.backgroundColor='#1565C0'" 
+            onmouseout="this.style.backgroundColor='#1E88E5'">
+                📖 Ver Manual Completo
+            </a>
+            """
 
-            # ✅ Mostrar un solo botón para ver/descargar el PDF
-            st.download_button(
-                label="📘 Ver Manual (PDF)",
-                data=pdf_bytes,
-                file_name="Manual_Etica_Transparencia_Privacidad_MIA.pdf",
-                mime="application/pdf",
-                help="Haz clic para abrir el manual en una nueva pestaña."
-            )
-
+            st.markdown(pdf_button, unsafe_allow_html=True)
             st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
         else:
             st.warning("El manual aún no está disponible.")
