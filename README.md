@@ -155,7 +155,7 @@ This file is excluded from version control through .gitignore.
 ---
 
 ## 🎥 Video Mia
-[![Video Mia]]()
+[Video Mia](https://youtu.be/gLNG7qks9OY)
 
 ---
 
