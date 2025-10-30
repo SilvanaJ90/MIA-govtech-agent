@@ -621,7 +621,7 @@ if not st.session_state.get("is_admin"):
 
         pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
         # Ruta relativa (desde la raíz del proyecto) para abrir el archivo directamente
-        pdf_url = "./docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+        pdf_url = "./assets/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
 
         if os.path.exists(pdf_path):
             pdf_button = f"""
