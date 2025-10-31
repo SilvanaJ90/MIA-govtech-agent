@@ -560,93 +560,173 @@ def render_mia_agent():
 # ------------------------------
 # Sidebar
 # ------------------------------
-if not st.session_state.get("is_admin"):
-    with st.sidebar:
-        try:
+#if not st.session_state.get("is_admin"):
+    #with st.sidebar:
+        #try:
             # Ruta absoluta al archivo de imagen dentro de frontend/assets/img
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            image_path = os.path.join(current_dir, "assets", "img", "mia.png")
-            st.image(image_path, width=120)
-        except Exception:
+            #current_dir = os.path.dirname(os.path.abspath(__file__))
+            #image_path = os.path.join(current_dir, "assets", "img", "mia.png")
+            #st.image(image_path, width=120)
+        #except Exception:
             # Si la imagen no carga, usa un placeholder
-            st.header("🏛️ MIA")
+            #st.header("🏛️ MIA")
 
         # -------------------------------
         # MENÚ PRINCIPAL / ACCESO
         # -------------------------------
-        if not st.session_state.get("logged_in"):
-            st.title("🏛️ MIA — Portal de Acceso")
-            st.markdown("Selecciona cómo deseas ingresar:")
-            st.info("🔹 Como **ciudadano** para realizar consultas o trámites.\n🔹 Como **administrador** para gestionar métricas y casos.")
+        #if not st.session_state.get("logged_in"):
+            #st.title("🏛️ MIA — Portal de Acceso")
+            #st.markdown("Selecciona cómo deseas ingresar:")
+            #st.info("🔹 Como **ciudadano** para realizar consultas o trámites.\n🔹 Como **administrador** para gestionar métricas y casos.")
             
             # Botones para elegir modo de ingreso
-            if st.button("👤 Ingresar como Ciudadano"):
-                st.session_state['login_mode'] = "citizen"
-                st.session_state.current_section = "inicio"  # mantiene el login
-                st.rerun()
+            #if st.button("👤 Ingresar como Ciudadano"):
+                #st.session_state['login_mode'] = "citizen"
+                #st.session_state.current_section = "inicio"  # mantiene el login
+                #st.rerun()
 
-            if st.button("🧑‍💼 Ingresar como Administrador"):
-                st.session_state['login_mode'] = "admin"
-                st.session_state.current_section = "inicio"
-                st.rerun()
+            #if st.button("🧑‍💼 Ingresar como Administrador"):
+                #st.session_state['login_mode'] = "admin"
+                #st.session_state.current_section = "inicio"
+                #st.rerun()
 
-        else:
-            if not st.session_state.get("is_admin"):
-                st.title("👤 MIA — Menú Ciudadano")
-                st.markdown("Selecciona una acción:")
-            else:
-                st.title("🧑‍💼 Panel de Administración")
+        #else:
+            #if not st.session_state.get("is_admin"):
+                #st.title("👤 MIA — Menú Ciudadano")
+                #st.markdown("Selecciona una acción:")
+            #else:
+                #st.title("🧑‍💼 Panel de Administración")
 
         # -------------------------------
         # BOTÓN DE CITA PENDIENTE
         # -------------------------------
-        if (
-            st.session_state.get("pending_appointment")
-            and st.session_state.get("current_section") == "mia_agent"
-        ):
-            if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
-                st.session_state.current_section = "appointment_form"
-                st.rerun()
+        #if (
+            #st.session_state.get("pending_appointment")
+            #and st.session_state.get("current_section") == "mia_agent"
+        #):
+            #if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
+                #st.session_state.current_section = "appointment_form"
+                #st.rerun()
 
         # -------------------------------
         # MANUAL DE ÉTICA Y PRIVACIDAD
         # -------------------------------
         
+        #st.markdown("---")
+        #st.subheader("📘 Manual de Ética, Transparencia y Privacidad de Datos")
+
+        #st.markdown(
+            #"Consulta el documento oficial sobre transparencia, uso responsable de IA y privacidad de datos personales."
+        #)
+
+        #pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
+        #if os.path.exists(pdf_path):
+            # Ruta relativa (desde la raíz del proyecto) para abrir el archivo directamente
+            #pdf_url = "https://raw.githubusercontent.com/SilvanaJ90/MIA-govtech-agent/main/docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+
+            #pdf_button = f"""
+            #<a href="{pdf_url}" target="_blank" style="
+                #display: inline-block;
+                #background-color: #1E88E5;
+                #color: white;
+                #font-weight: 600;
+                #text-decoration: none;
+                #padding: 0.6em 1.4em;
+                #border-radius: 10px;
+                #transition: background-color 0.3s ease;
+           #" 
+            #onmouseover="this.style.backgroundColor='#1565C0'" 
+            #onmouseout="this.style.backgroundColor='#1E88E5'">
+                #📖 Ver Manual Completo
+                #</a>
+                #"""
+
+            #st.markdown(pdf_button, unsafe_allow_html=True)
+            #st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
+     
+        #else:
+            #st.warning("El manual aún no está disponible.")
+
+# ------------------------------
+# Sidebar (corregido)
+# ------------------------------
+with st.sidebar:
+    try:
+        # Ruta absoluta al archivo de imagen dentro de frontend/assets/img
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        image_path = os.path.join(current_dir, "assets", "img", "mia.png")
+        st.image(image_path, width=120)
+    except Exception:
+        st.header("🏛️ MIA")
+
+    # -------------------------------
+    # 1️⃣ USUARIO NO AUTENTICADO
+    # -------------------------------
+    if not st.session_state.get("logged_in"):
+        st.title("🏛️ MIA — Portal de Acceso")
+        st.markdown("Selecciona cómo deseas ingresar:")
+        st.info("🔹 Como **ciudadano** para realizar consultas o trámites.\n🔹 Como **administrador** para gestionar métricas y casos.")
+
+        if st.button("👤 Ingresar como Ciudadano"):
+            st.session_state['login_mode'] = "citizen"
+            st.session_state.current_section = "inicio"
+            st.rerun()
+
+        if st.button("🧑‍💼 Ingresar como Administrador"):
+            st.session_state['login_mode'] = "admin"
+            st.session_state.current_section = "inicio"
+            st.rerun()
+
+        # Manual solo visible antes de iniciar sesión
         st.markdown("---")
         st.subheader("📘 Manual de Ética, Transparencia y Privacidad de Datos")
-
         st.markdown(
             "Consulta el documento oficial sobre transparencia, uso responsable de IA y privacidad de datos personales."
         )
 
-        pdf_path = os.path.join(DOCS_PATH, "Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf")
-        if os.path.exists(pdf_path):
-            # Ruta relativa (desde la raíz del proyecto) para abrir el archivo directamente
-            pdf_url = "https://raw.githubusercontent.com/SilvanaJ90/MIA-govtech-agent/main/docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+        pdf_url = "https://raw.githubusercontent.com/SilvanaJ90/MIA-govtech-agent/main/docs/Politica_Etica_Transparencia_Privacidad_Chatbot_MSI.pdf"
+        pdf_button = f"""
+        <a href="{pdf_url}" target="_blank" style="
+            display: inline-block;
+            background-color: #1E88E5;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 0.6em 1.4em;
+            border-radius: 10px;
+        " 
+        onmouseover="this.style.backgroundColor='#1565C0'" 
+        onmouseout="this.style.backgroundColor='#1E88E5'">
+            📖 Ver Manual Completo
+        </a>
+        """
+        st.markdown(pdf_button, unsafe_allow_html=True)
+        st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
 
-            pdf_button = f"""
-            <a href="{pdf_url}" target="_blank" style="
-                display: inline-block;
-                background-color: #1E88E5;
-                color: white;
-                font-weight: 600;
-                text-decoration: none;
-                padding: 0.6em 1.4em;
-                border-radius: 10px;
-                transition: background-color 0.3s ease;
-            " 
-            onmouseover="this.style.backgroundColor='#1565C0'" 
-            onmouseout="this.style.backgroundColor='#1E88E5'">
-                📖 Ver Manual Completo
-                </a>
-                """
+    # -------------------------------
+    # 2️⃣ USUARIO CIUDADANO LOGUEADO
+    # -------------------------------
+    elif not st.session_state.get("is_admin"):
+        st.title("👤 MIA — Menú Ciudadano")
+        st.markdown("Selecciona una acción:")
 
-            st.markdown(pdf_button, unsafe_allow_html=True)
-            st.caption("El archivo se abrirá en una nueva pestaña del navegador.")
-     
-        else:
-            st.warning("El manual aún no está disponible.")
+        if st.button("💬 Chat con MIA"):
+            st.session_state.current_section = "mia_agent"
+            st.rerun()
 
+        if st.session_state.get("pending_appointment"):
+            if st.button("➡️ Agendar Cita (Pendiente)", type="secondary"):
+                st.session_state.current_section = "appointment_form"
+                st.rerun()
+
+        st.markdown("---")
+        st.caption(f"Sesión activa: {st.session_state.get('citizen_name', 'Ciudadano')}")
+        if st.button("🚪 Cerrar sesión"):
+            for key in ["logged_in", "citizen_id", "citizen_name", "citizen_email", "is_admin"]:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.session_state.current_section = "inicio"
+            st.rerun()
 
 # ------------------------------
 # 8. Renderizado de Métricas y Flujo Principal
